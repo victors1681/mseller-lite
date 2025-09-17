@@ -40,16 +40,29 @@ const requiredKeys = [
   "messagingSenderId",
   "appId",
 ];
+
 const missingKeys = requiredKeys.filter(
   (key) => !firebaseConfig[key as keyof typeof firebaseConfig]
 );
 
 if (missingKeys.length > 0) {
-  console.error("Missing Firebase configuration keys:", missingKeys);
+  console.error("🚨 Missing Firebase configuration keys:", missingKeys);
   console.error(
-    "Please check your .env file and ensure all required Firebase configuration values are set."
+    "📝 Please check your environment variables and ensure all required Firebase configuration values are set."
   );
-  console.error("See .env.example for the required format.");
+  console.error(
+    "📖 See ENVIRONMENT_VARIABLES_SETUP.md for the required format."
+  );
+
+  // Enhanced debugging for production
+  if (!__DEV__) {
+    console.log("🚨 PRODUCTION: Firebase Config Debug:", {
+      missingKeys,
+      hasConstants: !!Constants.expoConfig?.extra,
+      configKeys: Object.keys(firebaseConfig),
+      timestamp: new Date().toISOString(),
+    });
+  }
 }
 
 // Initialize Firebase
