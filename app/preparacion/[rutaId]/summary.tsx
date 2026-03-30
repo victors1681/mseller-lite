@@ -347,9 +347,18 @@ export default function SummaryScreen() {
                   {item.codigoProducto}
                 </Text>
               </View>
-              <Text style={[styles.qtyText, { color: theme.colors.primary }]}>
-                {item.cantidad}
-              </Text>
+              <View style={styles.qtyContainer}>
+                <Text style={[styles.qtyText, {
+                  color: item.cantidadConfirmada === item.cantidadSolicitada
+                    ? theme.colors.primary
+                    : theme.colors.error
+                }]}>
+                  {item.cantidadConfirmada}
+                </Text>
+                <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
+                  / {item.cantidadSolicitada}
+                </Text>
+              </View>
             </View>
           );
         }}
@@ -489,6 +498,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+  },
+  qtyContainer: {
+    alignItems: "flex-end" as const,
   },
   qtyText: {
     fontSize: 22,
