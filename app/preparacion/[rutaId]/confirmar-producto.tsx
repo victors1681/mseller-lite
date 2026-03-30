@@ -47,7 +47,15 @@ export default function ConfirmarProductoScreen() {
         cantidadTotal: parsedCantidad,
         observacion: hayDiferencia ? observacion : undefined,
       });
-      router.back();
+      // Navigate back with confirmed product info so picking screen updates
+      router.navigate({
+        pathname: "/preparacion/[rutaId]/picking" as any,
+        params: {
+          rutaId: params.rutaId ?? "0",
+          confirmedProduct: params.codigoProducto,
+          confirmedQty: parsedCantidad.toString(),
+        },
+      });
     } catch (err: any) {
       console.error("Error confirming product:", err);
       setError(err.response?.data?.message || "Error al confirmar producto");

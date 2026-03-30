@@ -1,134 +1,212 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Icon, Text, useTheme } from "react-native-paper";
+import { StyleSheet, View } from "react-native";
+import {
+  Button,
+  Chip,
+  Icon,
+  Text,
+  useTheme,
+} from "react-native-paper";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ConsolidadoProducto } from "../../types/preparacion";
 
 interface ProductCardProps {
   producto: ConsolidadoProducto;
-  onPress: (producto: ConsolidadoProducto) => void;
+  pickedQty?: number;
+  isConfirmed: boolean;
+  onConfirm?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  producto,
+  pickedQty = 0,
+  isConfirmed,
+  onConfirm,
+}) => {
   const theme = useTheme();
-  const clienteNames = (producto.distribucion ?? []).map(
-    (d) => d.nombreCliente || d.codigoCliente
-  );
+  const { t } = useTranslation();
+  const hasQty = pickedQty > 0;
 
   return (
-    <TouchableOpacity
+    <View
       style={[
         styles.container,
         {
           backgroundColor: theme.colors.surface,
-          borderLeftColor: theme.colors.primary,
+          opacity: isConfirmed ? 0.6 : 1,
+          borderLeftColor: isConfirmed
+            ? "#388E3C"
+            : hasQty
+              ? theme.colors.primary
+              : "#E0E0E0",
         },
       ]}
-      onPress={() => onPress(producto)}
-      activeOpacity={0.7}
     >
-      <View style={styles.topRow}>
-        <View style={styles.productInfo}>
+      <View style={styles.mainRow}>
+        {/* Status indicator */}
+        {isConfirmed && (
+          <View style={[styles.statusIcon, { backgroundColor: "#388E3C" }]}>
+            <Icon source="check" size={20} color="#fff" />
+          </View>
+        )}
+
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Top row: location + confirmed badge */}
+          <View style={styles.topRow}>
+            {producto.ubicacion ? (
+              <Chip compact style={styles.locationChip} textStyle={styles.locationChipText}>
+                {producto.ubicacion}
+              </Chip>
+            ) : (
+              <View />
+            )}
+            {isConfirmed && (
+              <Chip compact style={styles.confirmedChip} textStyle={styles.confirmedChipText}>
+                {`${t("preparacion.confirmed")} · ${pickedQty}`}
+              </Chip>
+            )}
+          </View>
+
+          {/* Product code — prominent */}
           <Text
             variant="titleMedium"
-            style={{ fontWeight: "bold", color: theme.colors.onSurface }}
+            style={[styles.productCode, { color: theme.colors.primary }]}
+            numberOfLines={1}
+          >
+            {producto.codigoProducto}
+          </Text>
+
+          {/* Product name — large */}
+          <Text
+            variant="bodyLarge"
+            style={[styles.productName, { color: theme.colors.onSurface }]}
             numberOfLines={2}
           >
             {producto.nombreProducto}
           </Text>
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}
-          >
-            {producto.codigoProducto} · {producto.unidad ?? ""}
-          </Text>
+
+          {/* Demand row */}
+          <View style={styles.demandRow}>
+            <View style={styles.demandItem}>
+              <Text variant="labelSmall" style={[styles.demandLabel, { color: theme.colors.onSurfaceVariant }]}>
+                {t("preparacion.totalDemand")}
+              </Text>
+              <Text style={[styles.demandValue, { color: theme.colors.onSurface }]}>
+                {String(producto.cantidadTotal).padStart(2, "0")}
+                <Text style={styles.demandUnit}> {producto.unidad ?? ""}</Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* Confirm button — navigates to confirmation screen */}
+          {!isConfirmed && onConfirm && (
+            <Button
+              mode="contained"
+              onPress={onConfirm}
+              icon="clipboard-check-outline"
+              style={[styles.confirmBtn, { backgroundColor: theme.colors.primary }]}
+              labelStyle={styles.confirmBtnLabel}
+            >
+              {t("preparacion.confirmProduct")}
+            </Button>
+          )}
         </View>
       </View>
-
-      <View style={styles.quantityRow}>
-        <Text style={styles.quantityLabel}>Total:</Text>
-        <Text
-          style={[
-            styles.quantityValue,
-            { color: theme.colors.onSurface },
-          ]}
-        >
-          {producto.cantidadTotal}
-        </Text>
-        <Text
-          style={[styles.unitText, { color: theme.colors.onSurfaceVariant }]}
-        >
-          {producto.unidad ?? ""}
-        </Text>
-      </View>
-
-      <Text
-        variant="bodySmall"
-        style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
-      >
-        Clientes: {clienteNames.join(", ") || "—"}
-      </Text>
-      <View style={styles.actionRow}>
-        <Text
-          variant="labelLarge"
-          style={{ color: theme.colors.primary, fontWeight: "bold" }}
-        >
-          Confirmar ►
-        </Text>
-      </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 16,
-    borderRadius: 12,
+    marginHorizontal: 12,
+    marginBottom: 10,
+    borderRadius: 16,
     borderLeftWidth: 4,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    minHeight: 48,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    overflow: "hidden",
+  },
+  mainRow: {
+    flexDirection: "row",
+    padding: 14,
+    gap: 10,
+  },
+  statusIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  content: {
+    flex: 1,
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
+    marginBottom: 6,
   },
-  productInfo: {
-    flex: 1,
-    marginRight: 8,
+  locationChip: {
+    backgroundColor: "#E8EEFF",
+    height: 24,
   },
-  confirmedBadge: {
-    marginLeft: 8,
+  locationChipText: {
+    color: "#003ec7",
+    fontSize: 11,
+    fontWeight: "700",
   },
-  quantityRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    marginTop: 8,
+  confirmedChip: {
+    backgroundColor: "#E8F5E9",
+    height: 24,
   },
-  quantityLabel: {
-    fontSize: 16,
+  confirmedChipText: {
+    color: "#388E3C",
+    fontWeight: "700",
+    fontSize: 11,
+  },
+  productCode: {
+    fontWeight: "800",
+    letterSpacing: 0.3,
+  },
+  productName: {
     fontWeight: "600",
-    marginRight: 8,
+    lineHeight: 22,
+    marginTop: 2,
   },
-  quantityValue: {
-    fontSize: 32,
+  demandRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    gap: 16,
+  },
+  demandItem: {},
+  demandLabel: {
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    fontSize: 10,
+    textTransform: "uppercase",
+  },
+  demandValue: {
+    fontSize: 24,
     fontWeight: "900",
-    lineHeight: 38,
+    lineHeight: 28,
   },
-  unitText: {
-    fontSize: 16,
-    marginLeft: 6,
+  demandUnit: {
+    fontSize: 14,
+    fontWeight: "500",
   },
-  actionRow: {
-    marginTop: 8,
-    alignItems: "flex-end",
-    minHeight: 48,
-    justifyContent: "center",
+  confirmBtn: {
+    marginTop: 10,
+    borderRadius: 20,
+  },
+  confirmBtnLabel: {
+    fontSize: 14,
+    fontWeight: "700",
   },
 });
 

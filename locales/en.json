@@ -61,7 +61,7 @@
     "navigation": {
         "home": "Home",
         "explore": "Explore",
-        "preparacion": "Picking",
+        "preparacion": "Routes",
         "inventory": "Inventory",
         "products": "Products",
         "profile": "Profile",
@@ -225,6 +225,25 @@
         "packages": "packages",
         "loaded": "Loaded",
         "pending": "Pending",
-        "viewLoading": "View Loading"
+        "viewLoading": "View Loading",
+        "routeDispatched": "✅ Route dispatched — truck en route",
+        "activeRoute": "ACTIVE ROUTE",
+        "liveSession": "LIVE SESSION",
+        "pickingProgress": "Picking Progress",
+        "productsPickedOf": "{{picked}}/{{total}} PRODUCTS PICKED",
+        "totalDemand": "TOTAL DEMAND",
+        "confirmZone": "Confirm Zone",
+        "confirmingZone": "Confirming...",
+        "zoneConfirmed": "Zone confirmed successfully",
+        "errorConfirmingZone": "Error confirming zone",
+        "counted": "COUNTED",
+        "confirmProduct": "Confirm",
+        "confirmWith": "Confirm with",
+        "enterQtyFirst": "Enter counted quantity first",
+        "wavePicking": "Wave Picking",
+        "items": "ITEMS",
+        "tabPicking": "PICKING",
+        "tabLoading": "LOADING",
+        "tabInventory": "INVENTORY"
     }
 }

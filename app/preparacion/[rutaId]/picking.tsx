@@ -1,10 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ActivityIndicator,
-  Button,
   Snackbar,
   Text,
   useTheme,
@@ -22,16 +21,22 @@ export default function PickingScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
-  const { rutaId } = useLocalSearchParams<{ rutaId: string }>();
+  const { rutaId, confirmedProduct, confirmedQty } = useLocalSearchParams<{
+    rutaId: string;
+    confirmedProduct?: string;
+    confirmedQty?: string;
+  }>();
   const numericRutaId = parseInt(rutaId ?? "0", 10);
   const isValidRutaId = Number.isFinite(numericRutaId) && numericRutaId > 0;
 
   const [data, setData] = useState<ConsolidadoResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [completing, setCompleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [pickedQtys, setPickedQtys] = useState<Record<string, number>>({});
+  const [confirmedProducts, setConfirmedProducts] = useState<Set<string>>(new Set());
 
   const loadConsolidado = useCallback(async () => {
     if (!isValidRutaId) {
@@ -41,11 +46,21 @@ export default function PickingScreen() {
     }
     try {
       setError("");
-      const response =
-        await preparacionService.getConsolidado(numericRutaId);
+      const response = await preparacionService.getConsolidado(numericRutaId);
       setData(response);
+      // Initialize picked quantities to 0 for new products only — preserve existing counts
+      setPickedQtys((prev) => {
+        const next = { ...prev };
+        response.zonas.forEach((z) =>
+          z.productos.forEach((p) => {
+            if (!(p.codigoProducto in next)) {
+              next[p.codigoProducto] = 0;
+            }
+          })
+        );
+        return next;
+      });
     } catch (err: any) {
-      console.error("Error loading consolidado:", err);
       setError(
         err.response?.data?.message ||
           err.message ||
@@ -61,46 +76,51 @@ export default function PickingScreen() {
     loadConsolidado();
   }, [loadConsolidado]);
 
+  // Handle confirmed product returning from confirmar-producto screen
+  useEffect(() => {
+    if (confirmedProduct) {
+      setConfirmedProducts((prev) => new Set(prev).add(confirmedProduct));
+      if (confirmedQty) {
+        setPickedQtys((prev) => ({
+          ...prev,
+          [confirmedProduct]: parseFloat(confirmedQty) || 0,
+        }));
+      }
+      setSuccess(`${confirmedProduct} — ${t("preparacion.confirmed")}`);
+    }
+  }, [confirmedProduct, confirmedQty]);
+
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     loadConsolidado();
   }, [loadConsolidado]);
 
-  const handleProductPress = (producto: ConsolidadoProducto) => {
-    router.push({
-      pathname: "/preparacion/[rutaId]/confirmar-producto" as any,
-      params: {
-        rutaId: rutaId ?? "0",
-        codigoProducto: producto.codigoProducto,
-        descripcion: producto.nombreProducto,
-        cantidadTotal: producto.cantidadTotal.toString(),
-        unidad: producto.unidad ?? "",
-      },
-    });
-  };
+  const handleProductPress = useCallback(
+    (producto: ConsolidadoProducto) => {
+      if (confirmedProducts.has(producto.codigoProducto)) return;
 
-  const handleCompletarPreparacion = async () => {
-    try {
-      setCompleting(true);
-      await preparacionService.completarPreparacion(numericRutaId);
-      setSuccess(t("preparacion.completedSuccess"));
-      setTimeout(() => router.back(), 1500);
-    } catch (err: any) {
-      console.error("Error completing preparacion:", err);
-      setError(
-        err.response?.data?.message || t("preparacion.errorCompleting")
-      );
-    } finally {
-      setCompleting(false);
-    }
-  };
+      // Navigate to confirmar-producto screen for qty entry and confirmation
+      router.push({
+        pathname: "/preparacion/[rutaId]/confirmar-producto" as any,
+        params: {
+          rutaId: rutaId ?? "0",
+          codigoProducto: producto.codigoProducto,
+          descripcion: producto.nombreProducto,
+          cantidadTotal: producto.cantidadTotal.toString(),
+          unidad: producto.unidad ?? "",
+        },
+      });
+    },
+    [confirmedProducts, rutaId, router]
+  );
 
-  // Compute totals across all zones
-  const totalProductos =
-    data?.zonas.reduce((sum, z) => sum + z.productos.length, 0) ?? 0;
-  const productosPreparados = 0; // TODO: track per-product confirmation status
-  const allConfirmed =
-    totalProductos > 0 && productosPreparados === totalProductos;
+
+  const totalProductos = useMemo(
+    () => data?.zonas.reduce((sum, z) => sum + z.productos.length, 0) ?? 0,
+    [data]
+  );
+
+  const productosPreparados = confirmedProducts.size;
 
   if (loading) {
     return (
@@ -121,25 +141,13 @@ export default function PickingScreen() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
-      {/* Back button */}
-      <View style={styles.navBar}>
-        <Button
-          icon="arrow-left"
-          onPress={() => router.back()}
-          mode="text"
-          compact
-          style={styles.backButton}
-          contentStyle={styles.backButtonContent}
-        >
-          {t("preparacion.title")}
-        </Button>
-      </View>
-
-      {/* Zone-grouped picking list */}
       <ZoneProductList
         zonas={data?.zonas ?? []}
+        pickedQtys={pickedQtys}
+        confirmedProducts={confirmedProducts}
+        confirmingZone={null}
         onProductPress={handleProductPress}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -152,54 +160,6 @@ export default function PickingScreen() {
           />
         }
       />
-
-      {/* Bottom fixed action bar */}
-      <View
-        style={[
-          styles.bottomBar,
-          { backgroundColor: theme.colors.surface, borderTopColor: "#E0E0E0" },
-        ]}
-      >
-        {isValidRutaId && !error && (
-          <View style={styles.bottomButtonRow}>
-            <Button
-              mode="outlined"
-              onPress={() =>
-                router.push(`/preparacion/${rutaId}/summary` as any)
-              }
-              icon="clipboard-text"
-              style={styles.secondaryButton}
-              contentStyle={styles.secondaryButtonContent}
-              compact
-            >
-              {t("preparacion.viewSummary")}
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() =>
-                router.push(`/preparacion/${rutaId}/loading` as any)
-              }
-              icon="truck"
-              style={styles.secondaryButton}
-              contentStyle={styles.secondaryButtonContent}
-              compact
-            >
-              {t("preparacion.viewLoading")}
-            </Button>
-          </View>
-        )}
-        <Button
-          mode="contained"
-          onPress={handleCompletarPreparacion}
-          disabled={!allConfirmed || completing}
-          loading={completing}
-          icon="check-all"
-          style={styles.completeButton}
-          contentStyle={styles.completeButtonContent}
-        >
-          {t("preparacion.completePicking")}
-        </Button>
-      </View>
 
       <Snackbar
         visible={!!error}
@@ -219,7 +179,7 @@ export default function PickingScreen() {
       <Snackbar
         visible={!!success}
         onDismiss={() => setSuccess("")}
-        duration={3000}
+        duration={2500}
       >
         {success}
       </Snackbar>
@@ -235,40 +195,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  navBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 4,
-    minHeight: 48,
-  },
-  backButton: {
-    minHeight: 48,
-  },
-  backButtonContent: {
-    minHeight: 48,
-  },
-  bottomBar: {
-    padding: 16,
-    paddingBottom: 32,
-    borderTopWidth: 1,
-    gap: 10,
-  },
-  bottomButtonRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  secondaryButton: {
-    flex: 1,
-    minHeight: 48,
-  },
-  secondaryButtonContent: {
-    minHeight: 48,
-  },
-  completeButton: {
-    minHeight: 48,
-  },
-  completeButtonContent: {
-    minHeight: 48,
   },
 });

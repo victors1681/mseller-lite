@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Icon, Text, useTheme } from "react-native-paper";
+import { Button, Chip, Icon, Text, useTheme } from "react-native-paper";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   ConsolidadoProducto,
   ConsolidadoZona,
@@ -15,96 +16,153 @@ import ProductCard from "./ProductCard";
 
 interface ZoneProductListProps {
   zonas: ConsolidadoZona[];
+  pickedQtys: Record<string, number>;
+  confirmedProducts: Set<string>;
+  confirmingZone: string | null;
+  onQtyChange?: (codigoProducto: string, qty: number) => void;
   onProductPress: (producto: ConsolidadoProducto) => void;
+  onConfirmZone?: (zonaNombre: string) => void;
   refreshControl?: React.ReactElement<RefreshControlProps>;
   ListHeaderComponent?: React.ReactElement;
 }
 
 interface SectionData {
   title: string;
+  allProducts: ConsolidadoProducto[];
   data: ConsolidadoProducto[];
-  completedCount: number;
-  totalCount: number;
 }
 
 const ZoneProductList: React.FC<ZoneProductListProps> = ({
   zonas,
+  pickedQtys,
+  confirmedProducts,
+  confirmingZone,
+  onQtyChange,
   onProductPress,
+  onConfirmZone,
   refreshControl,
   ListHeaderComponent,
 }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set());
 
   const sections: SectionData[] = zonas.map((zona) => ({
     title: zona.zonaNombre,
+    allProducts: zona.productos,
     data: collapsedZones.has(zona.zonaNombre) ? [] : zona.productos,
-    completedCount: 0,
-    totalCount: zona.productos.length,
   }));
 
   const toggleZone = (zona: string) => {
     setCollapsedZones((prev) => {
       const next = new Set(prev);
-      if (next.has(zona)) {
-        next.delete(zona);
-      } else {
-        next.add(zona);
-      }
+      if (next.has(zona)) next.delete(zona);
+      else next.add(zona);
       return next;
     });
   };
 
   const renderSectionHeader = ({ section }: { section: SectionData }) => {
     const isCollapsed = collapsedZones.has(section.title);
-    const isComplete = section.completedCount === section.totalCount;
+    const confirmedCount = section.allProducts.filter((p) =>
+      confirmedProducts.has(p.codigoProducto)
+    ).length;
+    const isComplete = confirmedCount === section.allProducts.length && section.allProducts.length > 0;
 
     return (
       <TouchableOpacity
         onPress={() => toggleZone(section.title)}
         activeOpacity={0.7}
-        style={[
-          styles.sectionHeader,
-          { backgroundColor: theme.colors.surfaceVariant },
-        ]}
+        style={[styles.sectionHeader, { backgroundColor: theme.colors.background }]}
       >
+        {/* Left: icon + name */}
         <View style={styles.sectionLeft}>
+          <View
+            style={[
+              styles.zoneIconWrap,
+              { backgroundColor: isComplete ? "#E8F5E9" : "#E8EEFF" },
+            ]}
+          >
+            <Icon
+              source={isComplete ? "check-all" : "package-variant"}
+              size={18}
+              color={isComplete ? "#388E3C" : "#003ec7"}
+            />
+          </View>
+          <Text
+            variant="labelLarge"
+            style={[styles.zoneName, { color: theme.colors.onSurface }]}
+            numberOfLines={1}
+          >
+            {section.title.toUpperCase()}
+          </Text>
+        </View>
+
+        {/* Right: items chip + chevron */}
+        <View style={styles.sectionRight}>
+          <Chip
+            compact
+            style={[
+              styles.itemsChip,
+              { backgroundColor: isComplete ? "#E8F5E9" : theme.colors.surfaceVariant },
+            ]}
+            textStyle={[
+              styles.itemsChipText,
+              { color: isComplete ? "#388E3C" : theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {`${confirmedCount}/${section.allProducts.length} ${t("preparacion.items")}`}
+          </Chip>
           <Icon
             source={isCollapsed ? "chevron-right" : "chevron-down"}
             size={20}
             color={theme.colors.onSurfaceVariant}
           />
-          <Text
-            variant="titleMedium"
-            style={{
-              fontWeight: "bold",
-              color: theme.colors.onSurface,
-              marginLeft: 8,
-            }}
-          >
-            Zona {section.title}
-          </Text>
-        </View>
-        <View style={styles.sectionRight}>
-          <Text
-            variant="bodyMedium"
-            style={{
-              color: isComplete ? "#388E3C" : theme.colors.onSurfaceVariant,
-              fontWeight: "bold",
-            }}
-          >
-            {section.completedCount}/{section.totalCount}
-          </Text>
-          {isComplete && (
-            <Icon source="check-circle" size={18} color="#388E3C" />
-          )}
         </View>
       </TouchableOpacity>
     );
   };
 
+  const renderSectionFooter = ({ section }: { section: SectionData }) => {
+    if (!onConfirmZone) return null;
+
+    const isCollapsed = collapsedZones.has(section.title);
+    if (isCollapsed) return null;
+
+    const allConfirmed = section.allProducts.every((p) =>
+      confirmedProducts.has(p.codigoProducto)
+    );
+    if (allConfirmed) return null;
+
+    const isConfirming = confirmingZone === section.title;
+
+    return (
+      <View style={styles.zoneFooter}>
+        <Button
+          mode="contained"
+          onPress={() => onConfirmZone(section.title)}
+          loading={isConfirming}
+          disabled={isConfirming}
+          icon={isConfirming ? undefined : "check-circle"}
+          style={[styles.confirmZoneButton, { backgroundColor: "#003ec7" }]}
+          contentStyle={styles.confirmZoneButtonContent}
+          labelStyle={styles.confirmZoneLabel}
+        >
+          {isConfirming
+            ? t("preparacion.confirmingZone")
+            : t("preparacion.confirmZone")}
+        </Button>
+      </View>
+    );
+  };
+
   const renderItem = ({ item }: { item: ConsolidadoProducto }) => (
-    <ProductCard producto={item} onPress={onProductPress} />
+    <ProductCard
+      producto={item}
+      pickedQty={pickedQtys[item.codigoProducto] ?? 0}
+      isConfirmed={confirmedProducts.has(item.codigoProducto)}
+      onConfirm={() => onProductPress(item)}
+    />
   );
 
   const hasProducts = zonas.some((z) => z.productos.length > 0);
@@ -115,6 +173,7 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
       keyExtractor={(item) => item.codigoProducto}
       renderItem={renderItem}
       renderSectionHeader={renderSectionHeader}
+      renderSectionFooter={renderSectionFooter}
       stickySectionHeadersEnabled
       refreshControl={refreshControl}
       ListHeaderComponent={ListHeaderComponent}
@@ -122,11 +181,8 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
       ListEmptyComponent={
         hasProducts ? null : (
           <View style={styles.empty}>
-            <Text
-              variant="bodyLarge"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
-              No hay productos en esta zona
+            <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+              {t("preparacion.noProducts")}
             </Text>
           </View>
         )
@@ -137,24 +193,63 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: 140,
+    paddingBottom: 120,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 48,
+    paddingVertical: 14,
+    minHeight: 52,
   },
   sectionLeft: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    gap: 10,
+  },
+  zoneIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  zoneName: {
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    flex: 1,
   },
   sectionRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
+  },
+  itemsChip: {
+    height: 26,
+  },
+  itemsChipText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+  zoneFooter: {
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 16,
+  },
+  confirmZoneButton: {
+    borderRadius: 28,
+    minHeight: 52,
+  },
+  confirmZoneButtonContent: {
+    minHeight: 52,
+  },
+  confirmZoneLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
   empty: {
     padding: 32,

@@ -55,7 +55,7 @@ export default function TabLayout() {
         options={{
           title: t("navigation.preparacion"),
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="clipboard.fill" color={color} />
+            <IconSymbol size={28} name="map.fill" color={color} />
           ),
         }}
       />

@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ProgressBar, Text, useTheme } from "react-native-paper";
+import { Chip, ProgressBar, Text, useTheme } from "react-native-paper";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ProgressHeaderProps {
   totalProductos: number;
@@ -14,41 +15,63 @@ const ProgressHeader: React.FC<ProgressHeaderProps> = ({
   noRuta,
 }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const progress =
     totalProductos > 0 ? productosPreparados / totalProductos : 0;
-  const isComplete = productosPreparados === totalProductos && totalProductos > 0;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
-    >
-      <View style={styles.headerRow}>
-        <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-          📦 {noRuta}
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+      {/* Route label + live session chip */}
+      <View style={styles.topRow}>
+        <Text
+          variant="labelSmall"
+          style={[styles.activeRouteLabel, { color: theme.colors.primary }]}
+        >
+          {t("preparacion.activeRoute")}
+        </Text>
+        <Chip
+          compact
+          icon="circle"
+          style={styles.liveChip}
+          textStyle={styles.liveChipText}
+        >
+          {t("preparacion.liveSession")}
+        </Chip>
+      </View>
+
+      {/* Route number */}
+      <Text
+        variant="headlineMedium"
+        style={[styles.routeNumber, { color: theme.colors.onSurface }]}
+        numberOfLines={1}
+      >
+        {noRuta}
+      </Text>
+
+      {/* Progress row */}
+      <View style={styles.progressRow}>
+        <Text
+          variant="bodyMedium"
+          style={{ color: theme.colors.onSurfaceVariant }}
+        >
+          {t("preparacion.pickingProgress")}
         </Text>
         <Text
-          variant="titleMedium"
-          style={{
-            color: isComplete ? "#388E3C" : theme.colors.onSurface,
-            fontWeight: "bold",
-          }}
+          variant="labelLarge"
+          style={[styles.progressCount, { color: theme.colors.onSurface }]}
         >
-          {productosPreparados} / {totalProductos}
+          {t("preparacion.productsPickedOf", {
+            picked: productosPreparados,
+            total: totalProductos,
+          })}
         </Text>
       </View>
+
       <ProgressBar
         progress={progress}
-        color={isComplete ? "#388E3C" : theme.colors.primary}
+        color={theme.colors.primary}
         style={styles.progressBar}
       />
-      <Text
-        variant="bodySmall"
-        style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
-      >
-        {isComplete
-          ? "✅ Preparación completa"
-          : `${Math.round(progress * 100)}% completado`}
-      </Text>
     </View>
   );
 };
@@ -56,20 +79,54 @@ const ProgressHeader: React.FC<ProgressHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    paddingTop: 16,
+    paddingBottom: 20,
+    marginBottom: 8,
+    borderRadius: 16,
+    margin: 12,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
-  headerRow: {
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  activeRouteLabel: {
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  liveChip: {
+    backgroundColor: "#EEF2FF",
+    height: 28,
+  },
+  liveChipText: {
+    color: "#003ec7",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  routeNumber: {
+    fontWeight: "900",
+    marginBottom: 12,
+    letterSpacing: -0.5,
+  },
+  progressRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
   },
+  progressCount: {
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
   progressBar: {
-    height: 10,
-    borderRadius: 5,
-    marginBottom: 6,
+    height: 8,
+    borderRadius: 4,
   },
 });
 

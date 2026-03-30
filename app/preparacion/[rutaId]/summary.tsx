@@ -154,38 +154,8 @@ export default function SummaryScreen() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
-      {/* Navigation bar */}
-      <View style={styles.navBar}>
-        <Button
-          icon="arrow-left"
-          onPress={() => router.back()}
-          mode="text"
-          compact
-          style={styles.navButton}
-          contentStyle={styles.navButtonContent}
-        >
-          {t("common.back")}
-        </Button>
-      </View>
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Text
-          variant="headlineSmall"
-          style={{ fontWeight: "bold", color: theme.colors.onBackground }}
-        >
-          📋 {t("preparacion.summaryTitle")}
-        </Text>
-        <Text
-          variant="bodyMedium"
-          style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
-        >
-          {data?.noRuta ?? `Ruta ${rutaId}`}
-        </Text>
-      </View>
-
       {/* Tab selector */}
       <View style={styles.tabRow}>
         <TouchableOpacity

@@ -73,7 +73,11 @@ export default function PreparacionTab() {
   }, [loadRutas]);
 
   const handleRutaPress = (ruta: RutaPreparacion) => {
-    router.push(`/preparacion/${ruta.rutaId}/picking` as any);
+    if (ruta.status === "lista_despacho") {
+      router.push(`/preparacion/${ruta.rutaId}/loading` as any);
+    } else {
+      router.push(`/preparacion/${ruta.rutaId}/picking` as any);
+    }
   };
 
   const getProgress = (ruta: RutaPreparacion) =>

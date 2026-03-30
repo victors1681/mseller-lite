@@ -62,7 +62,7 @@
   "navigation": {
     "home": "Inicio",
     "explore": "Explorar",
-    "preparacion": "Preparación",
+    "preparacion": "Rutas",
     "inventory": "Inventario",
     "products": "Productos",
     "profile": "Perfil",
@@ -248,6 +248,25 @@
     "loaded": "Cargado",
     "pending": "Pendiente",
     "viewLoading": "Ver Carga",
-    "zone": "Zona"
+    "zone": "Zona",
+    "routeDispatched": "✅ Ruta despachada — camión en ruta",
+    "activeRoute": "RUTA ACTIVA",
+    "liveSession": "EN VIVO",
+    "pickingProgress": "Progreso de Preparación",
+    "productsPickedOf": "{{picked}}/{{total}} PRODUCTOS PREPARADOS",
+    "totalDemand": "DEMANDA TOTAL",
+    "confirmZone": "Confirmar Zona",
+    "confirmingZone": "Confirmando...",
+    "zoneConfirmed": "Zona confirmada exitosamente",
+    "errorConfirmingZone": "Error al confirmar la zona",
+    "counted": "CONTADO",
+    "confirmProduct": "Confirmar",
+    "confirmWith": "Confirmar con",
+    "enterQtyFirst": "Ingrese la cantidad contada primero",
+    "wavePicking": "Wave Picking",
+    "items": "ARTÍCULOS",
+    "tabPicking": "PREPARACIÓN",
+    "tabLoading": "CARGA",
+    "tabInventory": "INVENTARIO"
   }
 }

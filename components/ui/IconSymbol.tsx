@@ -14,6 +14,7 @@ const MAPPING = {
   "profile.fill": "person",
   "settings.fill": "settings",
   "clipboard.fill": "assignment",
+  "map.fill": "map",
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;
