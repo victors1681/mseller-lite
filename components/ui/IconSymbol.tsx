@@ -13,6 +13,7 @@ const MAPPING = {
   barcode: "qr-code",
   "profile.fill": "person",
   "settings.fill": "settings",
+  "clipboard.fill": "assignment",
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;

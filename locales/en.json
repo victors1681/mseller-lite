@@ -61,6 +61,7 @@
     "navigation": {
         "home": "Home",
         "explore": "Explore",
+        "preparacion": "Picking",
         "inventory": "Inventory",
         "products": "Products",
         "profile": "Profile",
