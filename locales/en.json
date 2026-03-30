@@ -182,5 +182,21 @@
         "goodMorning": "Good morning",
         "goodAfternoon": "Good afternoon",
         "goodEvening": "Good evening"
+    },
+    "preparacion": {
+        "title": "Picking",
+        "subtitle": "Routes pending preparation",
+        "noRoutes": "No routes pending preparation",
+        "orders": "orders",
+        "products": "products",
+        "prepared": "prepared",
+        "errorLoading": "Error loading routes",
+        "invalidRouteId": "Invalid route ID",
+        "loadingPicking": "Loading picking...",
+        "errorLoadingPicking": "Error loading picking data",
+        "completedSuccess": "Picking completed successfully",
+        "errorCompleting": "Error completing picking",
+        "completePicking": "Complete Picking",
+        "noProducts": "No products to prepare"
     }
 }

@@ -22,6 +22,7 @@ export default function PickingScreen() {
   const router = useRouter();
   const { rutaId } = useLocalSearchParams<{ rutaId: string }>();
   const numericRutaId = parseInt(rutaId ?? "0", 10);
+  const isValidRutaId = Number.isFinite(numericRutaId) && numericRutaId > 0;
 
   const [data, setData] = useState<ConsolidadoResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,11 @@ export default function PickingScreen() {
   const [success, setSuccess] = useState("");
 
   const loadConsolidado = useCallback(async () => {
+    if (!isValidRutaId) {
+      setError("ID de ruta inválido");
+      setLoading(false);
+      return;
+    }
     try {
       setError("");
       const response =

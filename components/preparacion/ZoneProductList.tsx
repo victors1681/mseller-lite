@@ -109,6 +109,8 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
     <ProductCard producto={item} onPress={onProductPress} />
   );
 
+  const hasProducts = zonas.some((z) => z.productos.length > 0);
+
   return (
     <SectionList
       sections={sections}
@@ -120,14 +122,16 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
       ListHeaderComponent={ListHeaderComponent}
       contentContainerStyle={styles.listContent}
       ListEmptyComponent={
-        <View style={styles.empty}>
-          <Text
-            variant="bodyLarge"
-            style={{ color: theme.colors.onSurfaceVariant }}
-          >
-            No hay productos en esta zona
-          </Text>
-        </View>
+        hasProducts ? null : (
+          <View style={styles.empty}>
+            <Text
+              variant="bodyLarge"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              No hay productos en esta zona
+            </Text>
+          </View>
+        )
       }
     />
   );

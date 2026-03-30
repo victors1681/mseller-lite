@@ -24,6 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
       ]}
       onPress={() => onPress(producto)}
       activeOpacity={0.7}
+      disabled={isConfirmed}
     >
       <View style={styles.topRow}>
         <View style={styles.productInfo}>

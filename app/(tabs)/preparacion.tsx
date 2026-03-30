@@ -17,6 +17,7 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
+import { useTranslation } from "@/hooks/useTranslation";
 import { preparacionService } from "../../services/preparacionService";
 import {
   RutaPreparacion,
@@ -39,6 +40,7 @@ const statusConfig: Record<
 export default function PreparacionTab() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [rutas, setRutas] = useState<RutaPreparacion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ export default function PreparacionTab() {
     } catch (err: any) {
       console.error("Error loading rutas:", err);
       setError(
-        err.response?.data?.message || err.message || "Error al cargar rutas"
+        err.response?.data?.message || err.message || t("preparacion.errorLoading")
       );
     } finally {
       setLoading(false);
@@ -126,7 +128,7 @@ export default function PreparacionTab() {
                   variant="bodySmall"
                   style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4 }}
                 >
-                  {ruta.totalPedidos} pedidos · {ruta.totalProductos} productos
+                  {ruta.totalPedidos} {t("preparacion.orders")} · {ruta.totalProductos} {t("preparacion.products")}
                 </Text>
               </View>
             </View>
@@ -145,7 +147,7 @@ export default function PreparacionTab() {
                   textAlign: "right",
                 }}
               >
-                {ruta.productosPreparados}/{ruta.totalProductos} preparados
+                {ruta.productosPreparados}/{ruta.totalProductos} {t("preparacion.prepared")}
               </Text>
             </View>
           </Card.Content>
@@ -163,7 +165,7 @@ export default function PreparacionTab() {
       >
         <View style={styles.headerContainer}>
           <Text variant="headlineSmall" style={{ fontWeight: "bold" }}>
-            📦 Preparación
+            📦 {t("preparacion.title")}
           </Text>
         </View>
         {[1, 2, 3].map((i) => (
@@ -196,13 +198,13 @@ export default function PreparacionTab() {
           variant="headlineSmall"
           style={{ fontWeight: "bold", color: theme.colors.onBackground }}
         >
-          📦 Preparación
+          📦 {t("preparacion.title")}
         </Text>
         <Text
           variant="bodyMedium"
           style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
         >
-          Rutas pendientes de preparación
+          {t("preparacion.subtitle")}
         </Text>
       </View>
 
@@ -227,7 +229,7 @@ export default function PreparacionTab() {
                 textAlign: "center",
               }}
             >
-              No hay rutas pendientes de preparación
+              {t("preparacion.noRoutes")}
             </Text>
           </View>
         ) : (

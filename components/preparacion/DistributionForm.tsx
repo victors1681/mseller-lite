@@ -65,6 +65,7 @@ const DistributionForm: React.FC<DistributionFormProps> = ({
       }));
     }
     // Fallback: distribute evenly
+    if (clientes.length === 0) return [];
     const perClient = Math.floor(cantidadTotal / clientes.length);
     const remainder = cantidadTotal % clientes.length;
     return clientes.map((c, i) => ({

@@ -73,7 +73,7 @@ export default function RootLayout() {
     };
 
     // Add React Native global error handler
-    const originalHandler = ErrorUtils?.getGlobalHandler?.();
+    const originalHandler = typeof ErrorUtils !== "undefined" ? ErrorUtils?.getGlobalHandler?.() : undefined;
 
     const customGlobalHandler = (error: any, isFatal?: boolean) => {
       console.error("🚨 Global Error Handler:", { error, isFatal });
@@ -92,24 +92,21 @@ export default function RootLayout() {
       }
     };
 
-    if (ErrorUtils?.setGlobalHandler) {
+    if (typeof ErrorUtils !== "undefined" && ErrorUtils?.setGlobalHandler) {
       ErrorUtils.setGlobalHandler(customGlobalHandler);
     }
 
     return () => {
       console.error = originalConsoleError;
-      if (ErrorUtils?.setGlobalHandler && originalHandler) {
+      if (typeof ErrorUtils !== "undefined" && ErrorUtils?.setGlobalHandler && originalHandler) {
         ErrorUtils.setGlobalHandler(originalHandler);
       }
     };
   }, []);
 
   if (!loaded) {
-    console.log("⏳ Fonts loading...");
     return null;
   }
-
-  console.log("✅ App layout rendered successfully");
 
   return (
     <ErrorBoundary>
