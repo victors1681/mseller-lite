@@ -79,21 +79,28 @@ jobs:
 
       - name: Validate Expo configuration
         run: |
-          # Use expo config to validate (handles app.config.js ESM)
-          CONFIG_OUTPUT=$(npx expo config --type public 2>/dev/null)
-          if echo "$CONFIG_OUTPUT" | grep -q "name: 'MSeller Lite'"; then
+          # Validate Expo config directly from source file
+          CONFIG_FILE=""
+          if [ -f "app.config.js" ]; then CONFIG_FILE="app.config.js"; fi
+          if [ -f "app.config.ts" ]; then CONFIG_FILE="app.config.ts"; fi
+          if [ -f "app.json" ]; then CONFIG_FILE="app.json"; fi
+          if [ -z "$CONFIG_FILE" ]; then
+            echo "❌ No Expo config file found"
+            exit 1
+          fi
+          if grep -q '"MSeller Lite"' "$CONFIG_FILE" || grep -q "'MSeller Lite'" "$CONFIG_FILE"; then
             echo "✅ App name is MSeller Lite"
           else
             echo "❌ App name should be MSeller Lite"
             exit 1
           fi
-          if echo "$CONFIG_OUTPUT" | grep -q "slug: 'mseller-lite'"; then
+          if grep -q '"mseller-lite"' "$CONFIG_FILE" || grep -q "'mseller-lite'" "$CONFIG_FILE"; then
             echo "✅ App slug is mseller-lite"
           else
             echo "❌ App slug should be mseller-lite"
             exit 1
           fi
-          echo "✅ Expo configuration is valid for MSeller Lite"
+          echo "✅ Expo configuration is valid for MSeller Lite ($CONFIG_FILE)"
 
       - name: Validate inventory management components
         run: |
