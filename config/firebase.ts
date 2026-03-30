@@ -1,6 +1,29 @@
 import Constants from "expo-constants";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { Platform } from "react-native";
+
+const getDefaultEmulatorHost = (): string => {
+  const configuredHost = process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST?.trim();
+  if (configuredHost) return configuredHost;
+
+  const expoHostUri =
+    Constants.expoConfig?.hostUri ||
+    (
+      Constants as unknown as {
+        manifest2?: { extra?: { expoClient?: { hostUri?: string } } };
+      }
+    ).manifest2?.extra?.expoClient?.hostUri;
+  const expoHost = expoHostUri?.split(":")[0];
+  if (expoHost) return expoHost;
+
+  if (Platform.OS === "android") return "10.0.2.2";
+
+  return "127.0.0.1";
+};
 
 // Firebase config from environment variables
 const firebaseConfig = {
@@ -68,8 +91,69 @@ if (missingKeys.length > 0) {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Auth
+// Initialize Firebase services
 const auth = getAuth(app);
+const functions = getFunctions(app, "us-east1");
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-export { auth, firebaseConfig };
+const isEmulatorEnabled =
+  process.env.NODE_ENV === "development" &&
+  process.env.EXPO_PUBLIC_EMULATOR_ENABLED === "true";
+
+const authEmulatorPort = Number(
+  process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || "9099"
+);
+const functionsEmulatorPort = Number(
+  process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_EMULATOR_PORT || "9999"
+);
+const firestoreEmulatorPort = Number(
+  process.env.EXPO_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_PORT || "8080"
+);
+const storageEmulatorPort = Number(
+  process.env.EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT || "9199"
+);
+
+if (isEmulatorEnabled) {
+  try {
+    const emulatorHost = getDefaultEmulatorHost();
+    const globalWithEmulatorState = globalThis as typeof globalThis & {
+      __firebaseEmulatorsConnected?: boolean;
+    };
+
+    if (globalWithEmulatorState.__firebaseEmulatorsConnected) {
+      console.log("Firebase emulators already connected");
+    } else {
+      console.log("Initializing Firebase emulators...", {
+        host: emulatorHost,
+        platform: Platform.OS,
+        authPort: authEmulatorPort,
+        functionsPort: functionsEmulatorPort,
+        firestorePort: firestoreEmulatorPort,
+        storagePort: storageEmulatorPort,
+      });
+      connectAuthEmulator(auth, `http://${emulatorHost}:${authEmulatorPort}`);
+      connectFunctionsEmulator(functions, emulatorHost, functionsEmulatorPort);
+      connectFirestoreEmulator(db, emulatorHost, firestoreEmulatorPort);
+      connectStorageEmulator(storage, emulatorHost, storageEmulatorPort);
+      globalWithEmulatorState.__firebaseEmulatorsConnected = true;
+
+      console.log("Firebase emulators connected", {
+        host: emulatorHost,
+        auth: authEmulatorPort,
+        functions: functionsEmulatorPort,
+        firestore: firestoreEmulatorPort,
+        storage: storageEmulatorPort,
+      });
+    }
+  } catch (error) {
+    console.error("Firebase emulator initialization error:", {
+      error,
+      configuredHost: process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST,
+      platform: Platform.OS,
+    });
+  }
+}
+
+export { auth, db, firebaseConfig, functions, storage };
 export default app;

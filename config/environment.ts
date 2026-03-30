@@ -11,6 +11,59 @@ export interface EnvironmentConfig {
   mode: "local" | "production";
 }
 
+const DEFAULT_LOCAL_API_URL = "http://192.168.1.188:7173";
+
+const isEmulatorEnabled = (): boolean =>
+  process.env.NODE_ENV === "development" &&
+  process.env.EXPO_PUBLIC_EMULATOR_ENABLED === "true";
+
+const replaceLocalhostWithEmulatorHost = (rawUrl: string): string => {
+  const emulatorHost = process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST?.trim();
+  if (!emulatorHost) return rawUrl;
+
+  try {
+    const parsedUrl = new URL(rawUrl);
+    if (
+      parsedUrl.hostname === "localhost" ||
+      parsedUrl.hostname === "127.0.0.1"
+    ) {
+      parsedUrl.hostname = emulatorHost;
+      return parsedUrl.toString().replace(/\/$/, "");
+    }
+    return rawUrl;
+  } catch {
+    return rawUrl;
+  }
+};
+
+const getLocalApiBaseUrl = (): string => {
+  const rawLocalApiUrl =
+    process.env.TARGET ||
+    process.env.EXPO_PUBLIC_TARGET ||
+    process.env.EXPO_PUBLIC_API_BASE_URL ||
+    DEFAULT_LOCAL_API_URL;
+
+  const configuredLocalPort =
+    process.env.EXPO_PUBLIC_LOCAL_API_PORT || process.env.LOCAL_API_PORT;
+
+  if (isEmulatorEnabled() && configuredLocalPort) {
+    const emulatorHost = process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST?.trim();
+    if (emulatorHost) {
+      try {
+        const parsedUrl = new URL(rawLocalApiUrl);
+        const protocol = parsedUrl.protocol || "http:";
+        return `${protocol}//${emulatorHost}:${configuredLocalPort}`;
+      } catch {
+        return `http://${emulatorHost}:${configuredLocalPort}`;
+      }
+    }
+  }
+
+  return isEmulatorEnabled()
+    ? replaceLocalhostWithEmulatorHost(rawLocalApiUrl)
+    : rawLocalApiUrl;
+};
+
 // Check if we're running in local development mode
 const checkLocalDevelopment = (): boolean => {
   // For React Native/Expo, we can check environment variables
@@ -28,7 +81,7 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
 
   return {
     isLocalDevelopment,
-    apiBaseURL: isLocalDevelopment ? "http://192.168.1.188:7173" : undefined,
+    apiBaseURL: isLocalDevelopment ? getLocalApiBaseUrl() : undefined,
     mode: isLocalDevelopment ? "local" : "production",
   };
 };
@@ -42,7 +95,7 @@ export const getEnvironmentConfigWithUser = (
   if (isLocalDevelopment) {
     return {
       isLocalDevelopment: true,
-      apiBaseURL: "http://192.168.1.188:7173",
+      apiBaseURL: getLocalApiBaseUrl(),
       mode: "local",
     };
   }
@@ -72,5 +125,13 @@ export const logEnvironmentConfig = (userConfig?: IConfig) => {
     nodeEnv: process.env.NODE_ENV,
     localMode: process.env.EXPO_PUBLIC_LOCAL_MODE,
     useLocalAPI: process.env.EXPO_PUBLIC_USE_LOCAL_API,
+    emulatorEnabled: process.env.EXPO_PUBLIC_EMULATOR_ENABLED,
+    firebaseEmulatorHost: process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST,
+    localApiPort:
+      process.env.EXPO_PUBLIC_LOCAL_API_PORT || process.env.LOCAL_API_PORT,
+    localApiTarget:
+      process.env.TARGET ||
+      process.env.EXPO_PUBLIC_TARGET ||
+      process.env.EXPO_PUBLIC_API_BASE_URL,
   });
 };
