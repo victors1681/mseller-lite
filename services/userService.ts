@@ -1,10 +1,7 @@
-import { getFunctions, httpsCallable } from "firebase/functions";
-import app, { auth } from "../config/firebase";
+import { httpsCallable } from "firebase/functions";
+import { auth, functions } from "../config/firebase";
 import { IConfig, UserTypes } from "../types/user";
 import { axiosSetClientUrl, refreshAccessToken } from "./api";
-
-// Initialize Firebase Functions
-const functions = getFunctions(app, "us-east1");
 
 /**
  * Refresh the current user's access token
@@ -38,7 +35,7 @@ export const getAllCurrentProfile = async (): Promise<
  * Get user by access token from Firebase function
  */
 export const getUserByAccessToken = async (
-  accessToken: string
+  accessToken: string,
 ): Promise<UserTypes | undefined> => {
   try {
     const fn = httpsCallable(functions, "getUserByAccessToken");
@@ -90,7 +87,7 @@ export const initializeUserSession = async (): Promise<
  * Update user profile in Firebase
  */
 export const updateUserProfile = async (
-  profileData: Partial<UserTypes>
+  profileData: Partial<UserTypes>,
 ): Promise<UserTypes | undefined> => {
   try {
     const fn = httpsCallable(functions, "updateUserProfile");

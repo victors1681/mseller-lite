@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Snackbar, useTheme } from "react-native-paper";
 import DistributionForm from "../../../components/preparacion/DistributionForm";
 import { preparacionService } from "../../../services/preparacionService";
+import { ConsolidadoDistribucion } from "../../../types/preparacion";
 
 export default function ConfirmarProductoScreen() {
   const theme = useTheme();
@@ -15,14 +16,14 @@ export default function ConfirmarProductoScreen() {
     descripcion: string;
     cantidadTotal: string;
     unidad: string;
-    clientes: string;
+    distribucion: string;
   }>();
 
   const rutaId = parseInt(params.rutaId ?? "0", 10);
   const cantidadTotal = parseInt(params.cantidadTotal ?? "0", 10);
-  const clientes: string[] = (() => {
+  const distribucionClientes: ConsolidadoDistribucion[] = (() => {
     try {
-      return JSON.parse(params.clientes ?? "[]");
+      return JSON.parse(params.distribucion ?? "[]");
     } catch {
       return [];
     }
@@ -70,7 +71,7 @@ export default function ConfirmarProductoScreen() {
         codigoProducto={params.codigoProducto ?? ""}
         descripcion={params.descripcion ?? ""}
         cantidadTotal={cantidadTotal}
-        clientes={clientes}
+        distribucionClientes={distribucionClientes}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
         loading={loading}

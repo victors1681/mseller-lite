@@ -27,24 +27,30 @@ export interface RutaPreparacion {
 
 // ---- M1: Consolidated Picking ----
 
+export interface ConsolidadoDistribucion {
+  codigoCliente: string;
+  nombreCliente?: string;
+  cantidad: number;
+}
+
 export interface ConsolidadoProducto {
   codigoProducto: string;
-  descripcion: string;
+  nombreProducto: string;
+  ubicacion?: string;
   cantidadTotal: number;
-  cantidadPreparada: number;
-  unidad: string;
-  clientes: string[];
+  unidad?: string;
+  distribucion: ConsolidadoDistribucion[];
 }
 
 export interface ConsolidadoZona {
-  zona: string;
+  zonaId?: number;
+  zonaNombre: string;
   productos: ConsolidadoProducto[];
 }
 
 export interface ConsolidadoResponse {
   rutaId: number;
   noRuta: string;
-  status: RutaPreparacionStatus;
   zonas: ConsolidadoZona[];
 }
 

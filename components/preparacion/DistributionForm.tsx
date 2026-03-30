@@ -14,7 +14,7 @@ import {
   TextInput,
   useTheme,
 } from "react-native-paper";
-import { DistribucionCliente } from "../../types/preparacion";
+import { ConsolidadoDistribucion, DistribucionCliente } from "../../types/preparacion";
 
 interface ClienteDistribucion {
   codigoCliente: string;
@@ -26,9 +26,7 @@ interface DistributionFormProps {
   codigoProducto: string;
   descripcion: string;
   cantidadTotal: number;
-  clientes: string[];
-  /** per-client requested quantities (parallel to `clientes`) */
-  cantidadesPorCliente?: number[];
+  distribucionClientes: ConsolidadoDistribucion[];
   onConfirm: (
     cantidadPreparada: number,
     distribucion: DistribucionCliente[],
@@ -42,8 +40,7 @@ const DistributionForm: React.FC<DistributionFormProps> = ({
   codigoProducto,
   descripcion,
   cantidadTotal,
-  clientes,
-  cantidadesPorCliente,
+  distribucionClientes,
   onConfirm,
   onCancel,
   loading = false,
@@ -55,25 +52,15 @@ const DistributionForm: React.FC<DistributionFormProps> = ({
   );
   const [observacion, setObservacion] = useState("");
 
-  // Build client distribution based on requested quantities
+  // Build client distribution from backend distribucion data
   const initialDistribution: ClienteDistribucion[] = useMemo(() => {
-    if (cantidadesPorCliente && cantidadesPorCliente.length === clientes.length) {
-      return clientes.map((c, i) => ({
-        codigoCliente: c,
-        cantidadSolicitada: cantidadesPorCliente[i],
-        cantidadAsignada: cantidadesPorCliente[i],
-      }));
-    }
-    // Fallback: distribute evenly
-    if (clientes.length === 0) return [];
-    const perClient = Math.floor(cantidadTotal / clientes.length);
-    const remainder = cantidadTotal % clientes.length;
-    return clientes.map((c, i) => ({
-      codigoCliente: c,
-      cantidadSolicitada: perClient + (i < remainder ? 1 : 0),
-      cantidadAsignada: perClient + (i < remainder ? 1 : 0),
+    if (distribucionClientes.length === 0) return [];
+    return distribucionClientes.map((d) => ({
+      codigoCliente: d.codigoCliente,
+      cantidadSolicitada: d.cantidad,
+      cantidadAsignada: d.cantidad,
     }));
-  }, [clientes, cantidadesPorCliente, cantidadTotal]);
+  }, [distribucionClientes]);
 
   const [distribucion, setDistribucion] =
     useState<ClienteDistribucion[]>(initialDistribution);
@@ -111,7 +98,7 @@ const DistributionForm: React.FC<DistributionFormProps> = ({
   };
 
   const autoDistribute = (total: number) => {
-    if (clientes.length === 0) return;
+    if (distribucionClientes.length === 0) return;
     const newDist = distribucion.map((d) => {
       const ratio =
         cantidadTotal > 0 ? d.cantidadSolicitada / cantidadTotal : 0;

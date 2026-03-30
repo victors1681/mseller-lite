@@ -65,16 +65,15 @@ export default function PickingScreen() {
   }, [loadConsolidado]);
 
   const handleProductPress = (producto: ConsolidadoProducto) => {
-    if (producto.cantidadPreparada >= producto.cantidadTotal) return;
     router.push({
       pathname: "/preparacion/[rutaId]/confirmar-producto" as any,
       params: {
         rutaId: rutaId ?? "0",
         codigoProducto: producto.codigoProducto,
-        descripcion: producto.descripcion,
+        descripcion: producto.nombreProducto,
         cantidadTotal: producto.cantidadTotal.toString(),
-        unidad: producto.unidad,
-        clientes: JSON.stringify(producto.clientes),
+        unidad: producto.unidad ?? "",
+        distribucion: JSON.stringify(producto.distribucion ?? []),
       },
     });
   };
@@ -98,14 +97,7 @@ export default function PickingScreen() {
   // Compute totals across all zones
   const totalProductos =
     data?.zonas.reduce((sum, z) => sum + z.productos.length, 0) ?? 0;
-  const productosPreparados =
-    data?.zonas.reduce(
-      (sum, z) =>
-        sum +
-        z.productos.filter((p) => p.cantidadPreparada >= p.cantidadTotal)
-          .length,
-      0
-    ) ?? 0;
+  const productosPreparados = 0; // TODO: track per-product confirmation status
   const allConfirmed =
     totalProductos > 0 && productosPreparados === totalProductos;
 
