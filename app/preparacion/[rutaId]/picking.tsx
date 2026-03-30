@@ -141,7 +141,7 @@ export default function PickingScreen() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       <ZoneProductList
         zonas={data?.zonas ?? []}
