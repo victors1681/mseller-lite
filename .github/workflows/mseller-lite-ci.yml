@@ -38,8 +38,8 @@ jobs:
 
       - name: Check app configuration
         run: |
-          if [ ! -f "app.json" ]; then
-            echo "❌ app.json file is missing"
+          if [ ! -f "app.config.js" ] && [ ! -f "app.json" ]; then
+            echo "❌ Expo config file is missing (app.config.js or app.json)"
             exit 1
           fi
           if [ ! -f "package.json" ]; then
@@ -79,18 +79,22 @@ jobs:
 
       - name: Validate Expo configuration
         run: |
-          # Check if app.json has required fields for MSeller Lite
+          # Check Expo config (supports both app.config.js and app.json)
           node -e "
-            const config = require('./app.json');
-            if (!config.expo.name || !config.expo.slug) {
-              console.error('❌ app.json is missing required fields');
+            let config;
+            try { config = require('./app.config.js'); } catch(e) {}
+            if (!config) { try { config = require('./app.json'); } catch(e) {} }
+            if (!config) { console.error('❌ No Expo config found'); process.exit(1); }
+            const expo = config.expo || config;
+            if (!expo.name || !expo.slug) {
+              console.error('❌ Expo config is missing required fields');
               process.exit(1);
             }
-            if (config.expo.name !== 'MSeller Lite') {
+            if (expo.name !== 'MSeller Lite') {
               console.error('❌ App name should be MSeller Lite');
               process.exit(1);
             }
-            if (config.expo.slug !== 'mseller-lite') {
+            if (expo.slug !== 'mseller-lite') {
               console.error('❌ App slug should be mseller-lite');
               process.exit(1);
             }
