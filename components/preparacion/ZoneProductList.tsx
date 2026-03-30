@@ -37,11 +37,9 @@ const ZoneProductList: React.FC<ZoneProductListProps> = ({
   const [collapsedZones, setCollapsedZones] = useState<Set<string>>(new Set());
 
   const sections: SectionData[] = zonas.map((zona) => ({
-    title: zona.zona,
-    data: collapsedZones.has(zona.zona) ? [] : zona.productos,
-    completedCount: zona.productos.filter(
-      (p) => p.cantidadPreparada >= p.cantidadTotal
-    ).length,
+    title: zona.zonaNombre,
+    data: collapsedZones.has(zona.zonaNombre) ? [] : zona.productos,
+    completedCount: 0,
     totalCount: zona.productos.length,
   }));
 

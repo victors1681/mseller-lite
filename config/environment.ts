@@ -88,7 +88,7 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
 
 // Get environment configuration with user business config
 export const getEnvironmentConfigWithUser = (
-  userConfig?: IConfig
+  userConfig?: IConfig,
 ): EnvironmentConfig => {
   const isLocalDevelopment = checkLocalDevelopment();
 

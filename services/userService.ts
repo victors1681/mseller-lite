@@ -35,7 +35,7 @@ export const getAllCurrentProfile = async (): Promise<
  * Get user by access token from Firebase function
  */
 export const getUserByAccessToken = async (
-  accessToken: string
+  accessToken: string,
 ): Promise<UserTypes | undefined> => {
   try {
     const fn = httpsCallable(functions, "getUserByAccessToken");
@@ -87,7 +87,7 @@ export const initializeUserSession = async (): Promise<
  * Update user profile in Firebase
  */
 export const updateUserProfile = async (
-  profileData: Partial<UserTypes>
+  profileData: Partial<UserTypes>,
 ): Promise<UserTypes | undefined> => {
   try {
     const fn = httpsCallable(functions, "updateUserProfile");

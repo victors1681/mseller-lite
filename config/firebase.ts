@@ -10,6 +10,7 @@ const getDefaultEmulatorHost = (): string => {
   const configuredHost = process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST?.trim();
   if (configuredHost) return configuredHost;
 
+  // Try Expo host URI first, useful when running on physical devices via Expo Go.
   const expoHostUri =
     Constants.expoConfig?.hostUri ||
     (
@@ -20,6 +21,7 @@ const getDefaultEmulatorHost = (): string => {
   const expoHost = expoHostUri?.split(":")[0];
   if (expoHost) return expoHost;
 
+  // Android emulators cannot reach host localhost directly.
   if (Platform.OS === "android") return "10.0.2.2";
 
   return "127.0.0.1";
@@ -65,16 +67,16 @@ const requiredKeys = [
 ];
 
 const missingKeys = requiredKeys.filter(
-  (key) => !firebaseConfig[key as keyof typeof firebaseConfig]
+  (key) => !firebaseConfig[key as keyof typeof firebaseConfig],
 );
 
 if (missingKeys.length > 0) {
   console.error("🚨 Missing Firebase configuration keys:", missingKeys);
   console.error(
-    "📝 Please check your environment variables and ensure all required Firebase configuration values are set."
+    "📝 Please check your environment variables and ensure all required Firebase configuration values are set.",
   );
   console.error(
-    "📖 See ENVIRONMENT_VARIABLES_SETUP.md for the required format."
+    "📖 See ENVIRONMENT_VARIABLES_SETUP.md for the required format.",
   );
 
   // Enhanced debugging for production
@@ -102,16 +104,16 @@ const isEmulatorEnabled =
   process.env.EXPO_PUBLIC_EMULATOR_ENABLED === "true";
 
 const authEmulatorPort = Number(
-  process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || "9099"
+  process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_PORT || "9099",
 );
 const functionsEmulatorPort = Number(
-  process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_EMULATOR_PORT || "9999"
+  process.env.EXPO_PUBLIC_FIREBASE_FUNCTIONS_EMULATOR_PORT || "9999",
 );
 const firestoreEmulatorPort = Number(
-  process.env.EXPO_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_PORT || "8080"
+  process.env.EXPO_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_PORT || "8080",
 );
 const storageEmulatorPort = Number(
-  process.env.EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT || "9199"
+  process.env.EXPO_PUBLIC_FIREBASE_STORAGE_EMULATOR_PORT || "9199",
 );
 
 if (isEmulatorEnabled) {

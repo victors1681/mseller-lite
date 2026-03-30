@@ -10,7 +10,9 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
   const theme = useTheme();
-  const isConfirmed = producto.cantidadPreparada >= producto.cantidadTotal;
+  const clienteNames = (producto.distribucion ?? []).map(
+    (d) => d.nombreCliente || d.codigoCliente
+  );
 
   return (
     <TouchableOpacity
@@ -18,13 +20,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
         styles.container,
         {
           backgroundColor: theme.colors.surface,
-          borderLeftColor: isConfirmed ? "#388E3C" : theme.colors.primary,
-          opacity: isConfirmed ? 0.75 : 1,
+          borderLeftColor: theme.colors.primary,
         },
       ]}
       onPress={() => onPress(producto)}
       activeOpacity={0.7}
-      disabled={isConfirmed}
     >
       <View style={styles.topRow}>
         <View style={styles.productInfo}>
@@ -33,20 +33,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
             style={{ fontWeight: "bold", color: theme.colors.onSurface }}
             numberOfLines={2}
           >
-            {producto.descripcion}
+            {producto.nombreProducto}
           </Text>
           <Text
             variant="bodySmall"
             style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}
           >
-            {producto.codigoProducto} · {producto.unidad}
+            {producto.codigoProducto} · {producto.unidad ?? ""}
           </Text>
         </View>
-        {isConfirmed && (
-          <View style={styles.confirmedBadge}>
-            <Icon source="check-circle" size={28} color="#388E3C" />
-          </View>
-        )}
       </View>
 
       <View style={styles.quantityRow}>
@@ -54,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
         <Text
           style={[
             styles.quantityValue,
-            { color: isConfirmed ? "#388E3C" : theme.colors.onSurface },
+            { color: theme.colors.onSurface },
           ]}
         >
           {producto.cantidadTotal}
@@ -62,32 +57,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto, onPress }) => {
         <Text
           style={[styles.unitText, { color: theme.colors.onSurfaceVariant }]}
         >
-          {producto.unidad}
+          {producto.unidad ?? ""}
         </Text>
       </View>
 
-      {isConfirmed ? (
-        <Text variant="bodySmall" style={{ color: "#388E3C", marginTop: 4 }}>
-          ✓ Confirmado: {producto.cantidadPreparada}
+      <Text
+        variant="bodySmall"
+        style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
+      >
+        Clientes: {clienteNames.join(", ") || "—"}
+      </Text>
+      <View style={styles.actionRow}>
+        <Text
+          variant="labelLarge"
+          style={{ color: theme.colors.primary, fontWeight: "bold" }}
+        >
+          Confirmar ►
         </Text>
-      ) : (
-        <>
-          <Text
-            variant="bodySmall"
-            style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
-          >
-            Clientes: {producto.clientes.join(", ")}
-          </Text>
-          <View style={styles.actionRow}>
-            <Text
-              variant="labelLarge"
-              style={{ color: theme.colors.primary, fontWeight: "bold" }}
-            >
-              Confirmar ►
-            </Text>
-          </View>
-        </>
-      )}
+      </View>
     </TouchableOpacity>
   );
 };
