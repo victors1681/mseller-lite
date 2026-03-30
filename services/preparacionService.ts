@@ -3,6 +3,7 @@ import {
   ConfirmarCargaResponse,
   ConfirmarProductoRequest,
   ConsolidadoResponse,
+  ItemCargaConfirmacion,
   RutaPreparacion,
   SummaryResponse,
 } from "../types/preparacion";
@@ -57,13 +58,15 @@ class PreparacionService {
     return response.data;
   }
 
-  /** M5 — Confirm a client is loaded onto the truck */
+  /** M5 — Confirm a single RutaDetalle is loaded onto the truck, optionally with item-level quantities */
   async confirmarCarga(
     rutaId: number,
-    codigoCliente: string
+    rutaDetalleId: number,
+    items?: ItemCargaConfirmacion[]
   ): Promise<ConfirmarCargaResponse> {
     const { data } = await restClient.post<ConfirmarCargaResponse>(
-      `${this.baseEndpoint}/${rutaId}/confirmar-carga/${codigoCliente}`
+      `${this.baseEndpoint}/${rutaId}/confirmar-carga/${rutaDetalleId}`,
+      items ? { items } : undefined
     );
     return data;
   }

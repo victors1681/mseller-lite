@@ -114,6 +114,7 @@ export interface CargaProducto {
 }
 
 export interface CargaCliente {
+  rutaDetalleId: number;
   codigoCliente: string;
   nombreCliente: string;
   secuenciaEntrega: number;
@@ -133,4 +134,10 @@ export interface ConfirmarCargaResponse {
   totalClientes: number;
   clientesConfirmados: number;
   rutaDespachada: boolean;
+  noTransporte?: string;
+}
+
+export interface ItemCargaConfirmacion {
+  codigoProducto: string;
+  cantidadCargada: number;
 }
