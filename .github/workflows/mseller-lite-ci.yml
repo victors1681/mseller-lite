@@ -79,26 +79,26 @@ jobs:
 
       - name: Validate Expo configuration
         run: |
-          # Check Expo config (supports both app.config.js and app.json)
-          node -e "
-            let config;
-            try { config = require('./app.config.js'); } catch(e) {}
-            if (!config) { try { config = require('./app.json'); } catch(e) {} }
-            if (!config) { console.error('❌ No Expo config found'); process.exit(1); }
-            const expo = config.expo || config;
-            if (!expo.name || !expo.slug) {
-              console.error('❌ Expo config is missing required fields');
-              process.exit(1);
-            }
-            if (expo.name !== 'MSeller Lite') {
-              console.error('❌ App name should be MSeller Lite');
-              process.exit(1);
-            }
-            if (expo.slug !== 'mseller-lite') {
-              console.error('❌ App slug should be mseller-lite');
-              process.exit(1);
-            }
-            console.log('✅ Expo configuration is valid for MSeller Lite');
+          # Use expo config to validate (handles both app.json and app.config.js/ts)
+          npx expo config --type public 2>/dev/null | node -e "
+            const chunks = [];
+            process.stdin.on('data', d => chunks.push(d));
+            process.stdin.on('end', () => {
+              const config = JSON.parse(Buffer.concat(chunks).toString());
+              if (!config.name || !config.slug) {
+                console.error('❌ Expo config is missing required fields');
+                process.exit(1);
+              }
+              if (config.name !== 'MSeller Lite') {
+                console.error('❌ App name should be MSeller Lite, got: ' + config.name);
+                process.exit(1);
+              }
+              if (config.slug !== 'mseller-lite') {
+                console.error('❌ App slug should be mseller-lite, got: ' + config.slug);
+                process.exit(1);
+              }
+              console.log('✅ Expo configuration is valid for MSeller Lite');
+            });
           "
 
       - name: Validate inventory management components
