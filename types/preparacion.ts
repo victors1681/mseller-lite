@@ -127,3 +127,10 @@ export interface CargaResponse {
   noRuta: string;
   clientes: CargaCliente[];
 }
+
+export interface ConfirmarCargaResponse {
+  confirmado: boolean;
+  totalClientes: number;
+  clientesConfirmados: number;
+  rutaDespachada: boolean;
+}

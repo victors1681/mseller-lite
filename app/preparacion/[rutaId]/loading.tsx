@@ -68,7 +68,7 @@ export default function LoadingScreen() {
     try {
       setConfirmingClient(codigoCliente);
       setError("");
-      await preparacionService.confirmarCarga(numericRutaId, codigoCliente);
+      const response = await preparacionService.confirmarCarga(numericRutaId, codigoCliente);
       // Update local state to mark client as confirmed
       setData((prev) => {
         if (!prev) return prev;
@@ -81,7 +81,12 @@ export default function LoadingScreen() {
           ),
         };
       });
-      setSuccess(t("preparacion.clientLoaded"));
+
+      if (response.rutaDespachada) {
+        setSuccess(t("preparacion.routeDispatched"));
+      } else {
+        setSuccess(t("preparacion.clientLoaded"));
+      }
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
       setError(

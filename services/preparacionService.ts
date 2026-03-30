@@ -1,5 +1,6 @@
 import {
   CargaResponse,
+  ConfirmarCargaResponse,
   ConfirmarProductoRequest,
   ConsolidadoResponse,
   RutaPreparacion,
@@ -60,10 +61,11 @@ class PreparacionService {
   async confirmarCarga(
     rutaId: number,
     codigoCliente: string
-  ): Promise<void> {
-    await restClient.post(
+  ): Promise<ConfirmarCargaResponse> {
+    const { data } = await restClient.post<ConfirmarCargaResponse>(
       `${this.baseEndpoint}/${rutaId}/confirmar-carga/${codigoCliente}`
     );
+    return data;
   }
 }
 

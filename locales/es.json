@@ -248,6 +248,7 @@
     "loaded": "Cargado",
     "pending": "Pendiente",
     "viewLoading": "Ver Carga",
-    "zone": "Zona"
+    "zone": "Zona",
+    "routeDispatched": "✅ Ruta despachada — camión en ruta"
   }
 }

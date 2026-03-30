@@ -225,6 +225,7 @@
         "packages": "packages",
         "loaded": "Loaded",
         "pending": "Pending",
-        "viewLoading": "View Loading"
+        "viewLoading": "View Loading",
+        "routeDispatched": "✅ Route dispatched — truck en route"
     }
 }
