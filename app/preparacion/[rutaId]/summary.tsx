@@ -22,6 +22,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { preparacionService } from "../../../services/preparacionService";
 import {
   SummaryCliente,
+  SummaryClienteProducto,
   SummaryResponse,
   SummaryZona,
 } from "../../../types/preparacion";
@@ -122,10 +123,12 @@ export default function SummaryScreen() {
   const customerSections: SummarySection[] = (data?.clientes ?? []).map(
     (cliente: SummaryCliente) => ({
       title: `${cliente.nombreCliente} (${cliente.codigoCliente})`,
-      data: cliente.productos.map((p) => ({
+      data: cliente.productos.map((p: SummaryClienteProducto) => ({
         codigoProducto: p.codigoProducto,
         descripcion: p.descripcion,
-        cantidad: p.cantidad,
+        cantidad: p.cantidadConfirmada,
+        cantidadSolicitada: p.cantidadSolicitada,
+        cantidadConfirmada: p.cantidadConfirmada,
       })),
     })
   );
@@ -270,7 +273,7 @@ export default function SummaryScreen() {
               variant="titleMedium"
               style={{ fontWeight: "bold", color: theme.colors.onSurface }}
             >
-              {activeTab === "zones" ? `🗺️ ${t("inventory.zone")} ${section.title}` : `👤 ${section.title}`}
+              {activeTab === "zones" ? `🗺️ ${t("preparacion.zone")} ${section.title}` : `👤 ${section.title}`}
             </Text>
           </View>
         )}

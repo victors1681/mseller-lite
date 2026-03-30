@@ -78,10 +78,17 @@ export interface SummaryZona {
   productos: SummaryProducto[];
 }
 
+export interface SummaryClienteProducto {
+  codigoProducto: string;
+  descripcion: string;
+  cantidadSolicitada: number;
+  cantidadConfirmada: number;
+}
+
 export interface SummaryCliente {
   codigoCliente: string;
   nombreCliente: string;
-  productos: { codigoProducto: string; descripcion: string; cantidad: number }[];
+  productos: SummaryClienteProducto[];
 }
 
 export interface SummaryResponse {

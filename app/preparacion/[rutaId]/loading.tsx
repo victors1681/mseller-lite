@@ -102,11 +102,11 @@ export default function LoadingScreen() {
   const allLoaded = totalClients > 0 && loadedClients === totalClients;
   const progress = totalClients > 0 ? loadedClients / totalClients : 0;
 
+  const nextUnloadedClientCodigo = sortedClients.find((c) => !c.confirmado)?.codigoCliente ?? null;
+
   const renderClientCard = ({ item }: { item: CargaCliente }) => {
     const isConfirming = confirmingClient === item.codigoCliente;
-    // Find the next unloaded client (first non-confirmed in LIFO order)
-    const nextToLoad = sortedClients.find((c) => !c.confirmado);
-    const isNextToLoad = nextToLoad?.codigoCliente === item.codigoCliente;
+    const isNextToLoad = nextUnloadedClientCodigo === item.codigoCliente;
 
     return (
       <Card

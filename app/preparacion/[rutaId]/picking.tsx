@@ -169,32 +169,34 @@ export default function PickingScreen() {
           { backgroundColor: theme.colors.surface, borderTopColor: "#E0E0E0" },
         ]}
       >
-        <View style={styles.bottomButtonRow}>
-          <Button
-            mode="outlined"
-            onPress={() =>
-              router.push(`/preparacion/${rutaId}/summary` as any)
-            }
-            icon="clipboard-text"
-            style={styles.secondaryButton}
-            contentStyle={styles.secondaryButtonContent}
-            compact
-          >
-            {t("preparacion.viewSummary")}
-          </Button>
-          <Button
-            mode="outlined"
-            onPress={() =>
-              router.push(`/preparacion/${rutaId}/loading` as any)
-            }
-            icon="truck"
-            style={styles.secondaryButton}
-            contentStyle={styles.secondaryButtonContent}
-            compact
-          >
-            {t("preparacion.viewLoading")}
-          </Button>
-        </View>
+        {isValidRutaId && !error && (
+          <View style={styles.bottomButtonRow}>
+            <Button
+              mode="outlined"
+              onPress={() =>
+                router.push(`/preparacion/${rutaId}/summary` as any)
+              }
+              icon="clipboard-text"
+              style={styles.secondaryButton}
+              contentStyle={styles.secondaryButtonContent}
+              compact
+            >
+              {t("preparacion.viewSummary")}
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={() =>
+                router.push(`/preparacion/${rutaId}/loading` as any)
+              }
+              icon="truck"
+              style={styles.secondaryButton}
+              contentStyle={styles.secondaryButtonContent}
+              compact
+            >
+              {t("preparacion.viewLoading")}
+            </Button>
+          </View>
+        )}
         <Button
           mode="contained"
           onPress={handleCompletarPreparacion}
