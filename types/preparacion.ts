@@ -63,7 +63,42 @@ export interface ConfirmarProductoRequest {
   observacion?: string;
 }
 
-// ---- M3/M5: Truck Loading (Carga) ----
+// ---- M4: Summary ----
+
+export interface SummaryProducto {
+  codigoProducto: string;
+  descripcion: string;
+  cantidadSolicitada: number;
+  cantidadConfirmada: number;
+  unidad: string;
+}
+
+export interface SummaryZona {
+  zona: string;
+  productos: SummaryProducto[];
+}
+
+export interface SummaryCliente {
+  codigoCliente: string;
+  nombreCliente: string;
+  productos: { codigoProducto: string; descripcion: string; cantidad: number }[];
+}
+
+export interface SummaryResponse {
+  rutaId: number;
+  noRuta: string;
+  zonas: SummaryZona[];
+  clientes: SummaryCliente[];
+}
+
+// ---- M5: Truck Loading (Carga) ----
+
+export interface CargaProducto {
+  codigoProducto: string;
+  descripcion: string;
+  cantidad: number;
+  unidad: string;
+}
 
 export interface CargaCliente {
   codigoCliente: string;
@@ -71,6 +106,7 @@ export interface CargaCliente {
   secuenciaEntrega: number;
   totalBultos: number;
   confirmado: boolean;
+  productos: CargaProducto[];
 }
 
 export interface CargaResponse {

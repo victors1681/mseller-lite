@@ -9,6 +9,7 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
+import { useTranslation } from "@/hooks/useTranslation";
 import ProgressHeader from "../../../components/preparacion/ProgressHeader";
 import ZoneProductList from "../../../components/preparacion/ZoneProductList";
 import { preparacionService } from "../../../services/preparacionService";
@@ -20,6 +21,7 @@ import {
 export default function PickingScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
   const { rutaId } = useLocalSearchParams<{ rutaId: string }>();
   const numericRutaId = parseInt(rutaId ?? "0", 10);
   const isValidRutaId = Number.isFinite(numericRutaId) && numericRutaId > 0;
@@ -33,7 +35,7 @@ export default function PickingScreen() {
 
   const loadConsolidado = useCallback(async () => {
     if (!isValidRutaId) {
-      setError("ID de ruta inválido");
+      setError(t("preparacion.invalidRouteId"));
       setLoading(false);
       return;
     }
@@ -47,13 +49,13 @@ export default function PickingScreen() {
       setError(
         err.response?.data?.message ||
           err.message ||
-          "Error al cargar datos de preparación"
+          t("preparacion.errorLoadingPicking")
       );
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [numericRutaId]);
+  }, [numericRutaId, isValidRutaId, t]);
 
   useEffect(() => {
     loadConsolidado();
@@ -83,12 +85,12 @@ export default function PickingScreen() {
     try {
       setCompleting(true);
       await preparacionService.completarPreparacion(numericRutaId);
-      setSuccess("Preparación completada exitosamente");
+      setSuccess(t("preparacion.completedSuccess"));
       setTimeout(() => router.back(), 1500);
     } catch (err: any) {
       console.error("Error completing preparacion:", err);
       setError(
-        err.response?.data?.message || "Error al completar preparación"
+        err.response?.data?.message || t("preparacion.errorCompleting")
       );
     } finally {
       setCompleting(false);
@@ -119,7 +121,7 @@ export default function PickingScreen() {
           variant="bodyLarge"
           style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}
         >
-          Cargando picking...
+          {t("preparacion.loadingPicking")}
         </Text>
       </SafeAreaView>
     );
@@ -140,7 +142,7 @@ export default function PickingScreen() {
           style={styles.backButton}
           contentStyle={styles.backButtonContent}
         >
-          Preparación
+          {t("preparacion.title")}
         </Button>
       </View>
 
@@ -167,6 +169,32 @@ export default function PickingScreen() {
           { backgroundColor: theme.colors.surface, borderTopColor: "#E0E0E0" },
         ]}
       >
+        <View style={styles.bottomButtonRow}>
+          <Button
+            mode="outlined"
+            onPress={() =>
+              router.push(`/preparacion/${rutaId}/summary` as any)
+            }
+            icon="clipboard-text"
+            style={styles.secondaryButton}
+            contentStyle={styles.secondaryButtonContent}
+            compact
+          >
+            {t("preparacion.viewSummary")}
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() =>
+              router.push(`/preparacion/${rutaId}/loading` as any)
+            }
+            icon="truck"
+            style={styles.secondaryButton}
+            contentStyle={styles.secondaryButtonContent}
+            compact
+          >
+            {t("preparacion.viewLoading")}
+          </Button>
+        </View>
         <Button
           mode="contained"
           onPress={handleCompletarPreparacion}
@@ -176,7 +204,7 @@ export default function PickingScreen() {
           style={styles.completeButton}
           contentStyle={styles.completeButtonContent}
         >
-          Completar Preparación
+          {t("preparacion.completePicking")}
         </Button>
       </View>
 
@@ -185,7 +213,7 @@ export default function PickingScreen() {
         onDismiss={() => setError("")}
         duration={4000}
         action={{
-          label: "Reintentar",
+          label: t("common.retry"),
           onPress: () => {
             setError("");
             loadConsolidado();
@@ -231,6 +259,18 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
     borderTopWidth: 1,
+    gap: 10,
+  },
+  bottomButtonRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  secondaryButton: {
+    flex: 1,
+    minHeight: 48,
+  },
+  secondaryButtonContent: {
+    minHeight: 48,
   },
   completeButton: {
     minHeight: 48,
