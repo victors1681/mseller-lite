@@ -23,7 +23,10 @@ const replaceLocalhostWithEmulatorHost = (rawUrl: string): string => {
 
   try {
     const parsedUrl = new URL(rawUrl);
-    if (parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1") {
+    if (
+      parsedUrl.hostname === "localhost" ||
+      parsedUrl.hostname === "127.0.0.1"
+    ) {
       parsedUrl.hostname = emulatorHost;
       return parsedUrl.toString().replace(/\/$/, "");
     }

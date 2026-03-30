@@ -3,6 +3,7 @@ import {
   ConfirmarProductoRequest,
   ConsolidadoResponse,
   RutaPreparacion,
+  SummaryResponse,
 } from "../types/preparacion";
 import { restClient } from "./api";
 
@@ -37,6 +38,14 @@ class PreparacionService {
   /** Mark route preparation as complete */
   async completarPreparacion(rutaId: number): Promise<void> {
     await restClient.post(`${this.baseEndpoint}/${rutaId}/completar`);
+  }
+
+  /** M4 — Get preparation summary (zone + per-client breakdown) */
+  async getSummary(rutaId: number): Promise<SummaryResponse> {
+    const response = await restClient.get<SummaryResponse>(
+      `${this.baseEndpoint}/${rutaId}/resumen`
+    );
+    return response.data;
   }
 
   /** M5 — Get truck loading view (LIFO order) */
