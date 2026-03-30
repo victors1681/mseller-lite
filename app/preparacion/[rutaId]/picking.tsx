@@ -73,7 +73,6 @@ export default function PickingScreen() {
         descripcion: producto.nombreProducto,
         cantidadTotal: producto.cantidadTotal.toString(),
         unidad: producto.unidad ?? "",
-        distribucion: JSON.stringify(producto.distribucion ?? []),
       },
     });
   };

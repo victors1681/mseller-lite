@@ -65,7 +65,7 @@ export interface ConfirmarProductoRequest {
   rutaId: number;
   codigoProducto: string;
   cantidadTotal: number;
-  distribucion: DistribucionCliente[];
+  distribucion?: DistribucionCliente[];
   observacion?: string;
 }
 
