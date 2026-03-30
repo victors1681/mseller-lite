@@ -79,27 +79,21 @@ jobs:
 
       - name: Validate Expo configuration
         run: |
-          # Use expo config to validate (handles both app.json and app.config.js/ts)
-          npx expo config --type public 2>/dev/null | node -e "
-            const chunks = [];
-            process.stdin.on('data', d => chunks.push(d));
-            process.stdin.on('end', () => {
-              const config = JSON.parse(Buffer.concat(chunks).toString());
-              if (!config.name || !config.slug) {
-                console.error('❌ Expo config is missing required fields');
-                process.exit(1);
-              }
-              if (config.name !== 'MSeller Lite') {
-                console.error('❌ App name should be MSeller Lite, got: ' + config.name);
-                process.exit(1);
-              }
-              if (config.slug !== 'mseller-lite') {
-                console.error('❌ App slug should be mseller-lite, got: ' + config.slug);
-                process.exit(1);
-              }
-              console.log('✅ Expo configuration is valid for MSeller Lite');
-            });
-          "
+          # Use expo config to validate (handles app.config.js ESM)
+          CONFIG_OUTPUT=$(npx expo config --type public 2>/dev/null)
+          if echo "$CONFIG_OUTPUT" | grep -q "name: 'MSeller Lite'"; then
+            echo "✅ App name is MSeller Lite"
+          else
+            echo "❌ App name should be MSeller Lite"
+            exit 1
+          fi
+          if echo "$CONFIG_OUTPUT" | grep -q "slug: 'mseller-lite'"; then
+            echo "✅ App slug is mseller-lite"
+          else
+            echo "❌ App slug should be mseller-lite"
+            exit 1
+          fi
+          echo "✅ Expo configuration is valid for MSeller Lite"
 
       - name: Validate inventory management components
         run: |
