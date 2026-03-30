@@ -37,6 +37,10 @@ function RootLayoutContent() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="preparacion"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
@@ -54,22 +58,53 @@ export default function RootLayout() {
 
   // Add global error handling for production
   useEffect(() => {
+    console.log(
+      "🚀 App starting - Environment:",
+      __DEV__ ? "Development" : "Production"
+    );
+
     const originalConsoleError = console.error;
     console.error = (...args) => {
       originalConsoleError(...args);
       // In production, you might want to send this to a logging service
       if (__DEV__ === false) {
-        console.log("Production Error Logged:", args);
+        console.log("🚨 Production Error Logged:", args);
       }
     };
 
+    // Add React Native global error handler
+    const originalHandler = typeof ErrorUtils !== "undefined" ? ErrorUtils?.getGlobalHandler?.() : undefined;
+
+    const customGlobalHandler = (error: any, isFatal?: boolean) => {
+      console.error("🚨 Global Error Handler:", { error, isFatal });
+      if (!__DEV__) {
+        console.log("🚨 PRODUCTION: Global Error Details:", {
+          message: error?.message,
+          stack: error?.stack,
+          isFatal: isFatal ?? false,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Call original handler if it exists
+      if (originalHandler) {
+        originalHandler(error, isFatal);
+      }
+    };
+
+    if (typeof ErrorUtils !== "undefined" && ErrorUtils?.setGlobalHandler) {
+      ErrorUtils.setGlobalHandler(customGlobalHandler);
+    }
+
     return () => {
       console.error = originalConsoleError;
+      if (typeof ErrorUtils !== "undefined" && ErrorUtils?.setGlobalHandler && originalHandler) {
+        ErrorUtils.setGlobalHandler(originalHandler);
+      }
     };
   }, []);
 
   if (!loaded) {
-    // Async font loading only occurs in development.
     return null;
   }
 

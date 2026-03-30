@@ -51,6 +51,15 @@ export default function TabLayout() {
           }}
         /> */}
       <Tabs.Screen
+        name="preparacion"
+        options={{
+          title: t("navigation.preparacion"),
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="clipboard.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="inventory"
         options={{
           title: t("navigation.inventory"),

@@ -11,8 +11,27 @@
     "preview": {
       "distribution": "internal"
     },
+    "production-internal": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "enableProguardInReleaseBuilds": false,
+        "enableSeparateBuildPerCPUArchitecture": false
+      }
+    },
+    "production-playstore": {
+      "distribution": "store",
+      "android": {
+        "enableProguardInReleaseBuilds": false,
+        "enableSeparateBuildPerCPUArchitecture": false
+      }
+    },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "enableProguardInReleaseBuilds": false,
+        "enableSeparateBuildPerCPUArchitecture": false
+      }
     }
   },
   "submit": {

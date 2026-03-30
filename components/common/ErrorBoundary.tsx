@@ -32,6 +32,25 @@ class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+
+    // Enhanced logging for production debugging
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      isDev: __DEV__,
+    };
+
+    console.log(
+      "📊 Error Details for Debugging:",
+      JSON.stringify(errorDetails, null, 2)
+    );
+
+    // In production, you might want to send this to a logging service like Datadog
+    if (!__DEV__) {
+      console.log("🚨 PRODUCTION ERROR - Check logs:", errorDetails);
+    }
   }
 
   resetError = () => {

@@ -62,6 +62,7 @@
     "navigation": {
         "home": "Inicio",
         "explore": "Explorar",
+        "preparacion": "Preparación",
         "inventory": "Inventario",
         "products": "Productos",
         "profile": "Perfil",
@@ -204,5 +205,21 @@
         "goodMorning": "Buenos días",
         "goodAfternoon": "Buenas tardes",
         "goodEvening": "Buenas noches"
+    },
+    "preparacion": {
+        "title": "Preparación",
+        "subtitle": "Rutas pendientes de preparación",
+        "noRoutes": "No hay rutas pendientes de preparación",
+        "orders": "pedidos",
+        "products": "productos",
+        "prepared": "preparados",
+        "errorLoading": "Error al cargar rutas",
+        "invalidRouteId": "ID de ruta inválido",
+        "loadingPicking": "Cargando picking...",
+        "errorLoadingPicking": "Error al cargar datos de preparación",
+        "completedSuccess": "Preparación completada exitosamente",
+        "errorCompleting": "Error al completar preparación",
+        "completePicking": "Completar Preparación",
+        "noProducts": "No hay productos para preparar"
     }
 }
